@@ -107,5 +107,10 @@ func StreamCommandFactory() (cli.Command, error) {
 	} else {
 		s.config = DefaultConfig
 	}
+	for k, v := range DefaultConfig {
+		if _, ok := s.config[k]; !ok {
+			s.config[k] = v
+		}
+	}
 	return s, nil
 }

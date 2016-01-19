@@ -202,5 +202,10 @@ func CreateJobCommandFactory() (cli.Command, error) {
 	} else {
 		j.config = DefaultConfig
 	}
+	for k, v := range DefaultConfig {
+		if _, ok := j.config[k]; !ok {
+			j.config[k] = v
+		}
+	}
 	return j, nil
 }

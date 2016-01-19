@@ -16,9 +16,9 @@ const (
 
 var (
 	DefaultConfig = map[string]interface{}{
-		"job_url":      `http://api.binaryedge.io/v1/tasks`,
-		"stream_url":   `http://stream.api.binaryedge.io/v1/stream`,
-		"firehose_url": `http://stream.api.binaryedge.io/v1/firehose`,
+		"job_url":      `https://api.binaryedge.io/v1/tasks`,
+		"stream_url":   `https://stream.api.binaryedge.io/v1/stream`,
+		"firehose_url": `https://stream.api.binaryedge.io/v1/firehose`,
 		"token":        "",
 	}
 )
