@@ -1,7 +1,7 @@
 
 GOCMD = go
 GOINSTALL = $(GOCMD) install
-CLIPATH = github.com/binaryedge/be-cli
+CLIPATH = github.com/binaryedge/40fy-client
 
 default: all
 

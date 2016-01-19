@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -13,7 +12,6 @@ import (
 
 type FirehoseCommand struct {
 	client  http.Client
-	url     string
 	output  io.Writer
 	config  map[string]interface{}
 	verbose bool
@@ -29,15 +27,18 @@ func (s *FirehoseCommand) Run(args []string) int {
 	s.verbose = *verbose
 	// read file, load to token
 	if len(*token) == 0 {
-		if file, err := ioutil.ReadFile("client_token"); err == nil {
-			*token = string(file)
+		if tok, ok := s.config["token"].(string); ok && len(tok) > 0 {
+			*token = tok
+		} else {
+			fmt.Println(s.Help())
+			return -1
 		}
 	}
 	if len(*token) == 0 {
 		fmt.Println(s.Help())
 		return -1
 	}
-	req, err := http.NewRequest("GET", s.url, nil)
+	req, err := http.NewRequest("GET", s.config["firehose_url"].(string), nil)
 	if err != nil {
 		fmt.Println("Failed to connect ", err.Error())
 		return -1
@@ -72,7 +73,7 @@ func (s *FirehoseCommand) Synopsis() string {
 
 func (s *FirehoseCommand) Help() string {
 	return `
-Usage: be-cli firehose -token=TOKEN
+Usage: 40fy-client firehose -token=TOKEN
 
  The "TOKEN" parameter is the token given to you by BinaryEdge, it is used as authentication.
 	`
@@ -87,6 +88,11 @@ func FirehoseCommandFactory() (cli.Command, error) {
 		f.config = contents
 	} else {
 		f.config = DefaultConfig
+	}
+	for k, v := range DefaultConfig {
+		if _, ok := f.config[k]; !ok {
+			f.config[k] = v
+		}
 	}
 	return f, nil
 }

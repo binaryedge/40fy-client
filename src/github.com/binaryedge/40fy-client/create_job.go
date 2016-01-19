@@ -183,7 +183,7 @@ func (l *createJobCommand) Synopsis() string { return "Create a job in the platf
 
 func (l *createJobCommand) Help() string {
 	return `
-Usage: be-cli create-job -token=TOKEN -targets=TARGETS -modules=MODULES -port=PORT [-redirect]
+Usage: 40fy-client create-job -token=TOKEN -targets=TARGETS -modules=MODULES -port=PORT [-redirect]
 
  The TOKEN parameter is the token given to you by BinaryEdge, it is used as authentication.
  The TARGETS parameter lists the hosts that will be targeted. Targets are a list of IPs or CIDRs.
@@ -201,6 +201,11 @@ func CreateJobCommandFactory() (cli.Command, error) {
 		j.config = contents
 	} else {
 		j.config = DefaultConfig
+	}
+	for k, v := range DefaultConfig {
+		if _, ok := j.config[k]; !ok {
+			j.config[k] = v
+		}
 	}
 	return j, nil
 }

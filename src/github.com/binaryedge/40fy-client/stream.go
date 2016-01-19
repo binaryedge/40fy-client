@@ -90,7 +90,7 @@ func (s *StreamCommand) Synopsis() string { return "receive stream from api" }
 
 func (s *StreamCommand) Help() string {
 	return `
-Usage: be-cli stream -token=TOKEN [-job-id=JOBID]
+Usage: 40fy-client stream -token=TOKEN [-job-id=JOBID]
 
  The "TOKEN" parameter is the token given to you by BinaryEdge, it is used as authentication.
  The "JOB-ID" parameter is optional, if it is present then the stream will be filtered for this specific job.
@@ -106,6 +106,11 @@ func StreamCommandFactory() (cli.Command, error) {
 		s.config = contents
 	} else {
 		s.config = DefaultConfig
+	}
+	for k, v := range DefaultConfig {
+		if _, ok := s.config[k]; !ok {
+			s.config[k] = v
+		}
 	}
 	return s, nil
 }
