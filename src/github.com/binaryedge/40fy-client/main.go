@@ -31,7 +31,7 @@ func GetConfigContents(path string) (content map[string]interface{}, err error) 
 }
 
 func main() {
-	c := cli.NewCLI("foreman", "1.0.0")
+	c := cli.NewCLI("40fy-client", "1.0.0")
 	c.Args = os.Args[1:]
 	c.Commands = map[string]cli.CommandFactory{
 		"stream":     StreamCommandFactory,

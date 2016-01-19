@@ -72,7 +72,7 @@ func (s *FirehoseCommand) Synopsis() string {
 
 func (s *FirehoseCommand) Help() string {
 	return `
-Usage: be-cli firehose -token=TOKEN
+Usage: 40fy-client firehose -token=TOKEN
 
  The "TOKEN" parameter is the token given to you by BinaryEdge, it is used as authentication.
 	`
