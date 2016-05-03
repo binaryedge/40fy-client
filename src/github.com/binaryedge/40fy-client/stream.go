@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -71,6 +70,10 @@ func (s *StreamCommand) print(pattern string, v interface{}) {
 }
 
 type msg struct {
+	Origin origin `json:"origin"`
+}
+
+type origin struct {
 	JobID string `json:"job_id"`
 }
 
@@ -80,8 +83,8 @@ func readFromResponse(body io.ReadCloser, jobid string) {
 	for {
 		byts, _ := buf.ReadBytes('\n')
 		json.Unmarshal(byts, msg)
-		if jobid == msg.JobID {
-			io.Copy(bytes.NewBuffer(byts), os.Stdout)
+		if jobid == msg.Origin.JobID {
+			fmt.Println(string(byts))
 		}
 	}
 }
