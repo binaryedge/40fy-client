@@ -57,7 +57,7 @@ func (s *FirehoseCommand) Run(args []string) int {
 		fmt.Println(msg)
 		return -1
 	}
-	io.Copy(s.output, resp.Body)
+	process(resp.Body)
 	return 0
 }
 
@@ -89,6 +89,7 @@ func FirehoseCommandFactory() (cli.Command, error) {
 	} else {
 		f.config = DefaultConfig
 	}
+	plugins = append(plugins, &printer{})
 	for k, v := range DefaultConfig {
 		if _, ok := f.config[k]; !ok {
 			f.config[k] = v

@@ -6,8 +6,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/mitchellh/cli"
 )
@@ -17,6 +19,17 @@ type StreamCommand struct {
 	output  io.Writer
 	config  map[string]interface{}
 	verbose bool
+}
+
+type plugin interface {
+	init()
+	run(*map[string]interface{})
+}
+
+var plugins []plugin
+
+func register(f plugin) {
+	plugins = append(plugins, f)
 }
 
 func (s *StreamCommand) Run(args []string) int {
@@ -56,11 +69,30 @@ func (s *StreamCommand) Run(args []string) int {
 		return -1
 	}
 	if len(*jobID) == 0 {
-		io.Copy(s.output, resp.Body)
+		process(resp.Body)
 	} else {
 		readFromResponse(resp.Body, *jobID)
 	}
 	return 0
+}
+
+func process(r io.Reader) {
+	dec := json.NewDecoder(r)
+	m := make(map[string]interface{})
+	for dec.More() {
+		if err := dec.Decode(&m); err != nil {
+			log.Fatal(err)
+			continue
+		}
+		if len(m) == 0 {
+			log.Println(m)
+			continue
+		}
+
+		for _, p := range plugins {
+			p.run(&m)
+		}
+	}
 }
 
 func (s *StreamCommand) print(pattern string, v interface{}) {
@@ -82,7 +114,11 @@ func readFromResponse(body io.ReadCloser, jobid string) {
 	msg := &msg{}
 	for {
 		byts, _ := buf.ReadBytes('\n')
-		json.Unmarshal(byts, msg)
+
+		if err := json.Unmarshal(byts, msg); err != nil {
+			log.Println("error: ", err)
+			break
+		}
 		if jobid == msg.Origin.JobID {
 			fmt.Println(string(byts))
 		}
@@ -102,9 +138,12 @@ Usage: 40fy-client stream -token=TOKEN [-job-id=JOBID]
 
 func StreamCommandFactory() (cli.Command, error) {
 	s := &StreamCommand{
-		client: http.Client{},
+		client: http.Client{
+			Timeout: 5 * time.Second,
+		},
 		output: os.Stdout,
 	}
+	plugins = append(plugins, &printer{})
 	if contents, err := GetConfigContents(config_file_name); err == nil {
 		s.config = contents
 	} else {
